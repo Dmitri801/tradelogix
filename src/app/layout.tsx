@@ -45,7 +45,6 @@ export default function RootLayout({
             : "bg-tradelogix-light text-gray-900"
         )}
       >
-        {/* Navbar */}
         <nav
           className={cn(
             "flex justify-between items-center p-4",
