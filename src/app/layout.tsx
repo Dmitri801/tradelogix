@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-
+import { TRPCReactProvider } from "@/trpc/client";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -100,8 +100,7 @@ export default function RootLayout({
             </Button>
           </div>
         </nav>
-        {/* Main Content */}
-        <main className="py-8 px-4">{children}</main>
+        <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
   );
