@@ -35,13 +35,4 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
       auth: session,
     },
   });
-  // if (!ctx.userId) {
-  //   throw new Error('Unauthorized');
-  // }
-  // return next({
-  //   ctx: {
-  //     // Infers the `user` as non-nullable
-  //     userId: ctx.userId,
-  //   },
-  // });
 });

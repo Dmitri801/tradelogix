@@ -69,7 +69,7 @@ export function LoginForm() {
 
   return (
     <div className="flex flex-col flex-1 w-full gap-6 p-5">
-      <Card className="w-full">
+      <Card className="w-full max-w-lg mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
           <CardDescription className="text-muted-foreground text-center">
@@ -85,12 +85,32 @@ export function LoginForm() {
               <div className="grid gap-6">
                 <div className="flex flex-col gap-4">
                   <Button
-                    variant="outline"
+                    variant="dark"
                     className="w-full"
                     type="button"
                     disabled={isPending}
                   >
+                    <Image
+                      src="/logos/google-white-icon.png"
+                      alt="google icon"
+                      width={20}
+                      height={20}
+                    />
                     Continue with Google
+                  </Button>
+                  <Button
+                    variant="dark"
+                    className="w-full"
+                    type="button"
+                    disabled={isPending}
+                  >
+                    <Image
+                      src="/logos/apple-logo-white.png"
+                      alt="apple icon"
+                      width={20}
+                      height={20}
+                    />
+                    Continue with Apple
                   </Button>
                 </div>
               </div>
