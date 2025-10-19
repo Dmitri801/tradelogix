@@ -1,13 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Rocket } from "lucide-react";
 import { toast } from "sonner";
 
 const Start = () => {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { data } = useQuery(trpc.getWorkflows.queryOptions());
 
   const createWorkflow = useMutation(
