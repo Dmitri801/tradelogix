@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Rocket } from "lucide-react";
+import { toast } from "sonner";
 
 const Start = () => {
   const trpc = useTRPC();
@@ -12,7 +13,7 @@ const Start = () => {
   const createWorkflow = useMutation(
     trpc.createWorkflow.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries(trpc.getWorkflows.queryOptions());
+        toast.success("Workflow created successfully!");
       },
     })
   );
