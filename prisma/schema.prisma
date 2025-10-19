@@ -96,6 +96,13 @@ model Verification {
   @@map("verification")
 }
 
+model Workflow {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // 2. Trade Model - The main object for journaling
 model Trade {
   id     String @id @default(cuid())
@@ -172,18 +179,18 @@ model Tag {
   name     String // e.g., "Emotional Trading", "High Volatility", "Successful Retest"
   colorHex String? // Optional color for UI display
 
-  trades   TradeTag[] // Relation to join table
+  trades TradeTag[] // Relation to join table
 
   @@unique([userId, name])
 }
 
 // Join table for many-to-many relation between Trade and Tag
 model TradeTag {
-  trade   Trade @relation(fields: [tradeId], references: [id])
+  trade   Trade  @relation(fields: [tradeId], references: [id])
   tradeId String
 
-  tag     Tag   @relation(fields: [tagId], references: [id])
-  tagId   String
+  tag   Tag    @relation(fields: [tagId], references: [id])
+  tagId String
 
   @@id([tradeId, tagId])
 }
