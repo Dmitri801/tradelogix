@@ -60,12 +60,12 @@ export function RegisterForm() {
         name: data.email,
         email: data.email,
         password: data.password,
-        callbackURL: "/",
+        callbackURL: "/start",
       },
       {
         onSuccess: () => {
           toast.success("Account created successfully!");
-          router.push("/");
+          router.push("/start");
         },
         onError: (ctx) => {
           toast.error(`Error: ${ctx.error.message}`);

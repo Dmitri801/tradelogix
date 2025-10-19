@@ -54,7 +54,7 @@ export function LoginForm() {
       {
         onSuccess: () => {
           toast.success("Logged in successfully!");
-          router.push("/");
+          router.push("/start");
         },
         onError: (ctx) => {
           toast.error(

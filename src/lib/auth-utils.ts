@@ -20,7 +20,7 @@ export const requireNoAuth = async () => {
   });
 
   if (session) {
-    redirect("/");
+    redirect("/start");
   }
 
   return session;
