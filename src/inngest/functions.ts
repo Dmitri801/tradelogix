@@ -1,17 +1,27 @@
-import prisma from "@/lib/db";
 import { inngest } from "./client";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { streamText } from "ai";
 
-export const helloWorld = inngest.createFunction(
-  { id: "hello-world" },
-  { event: "test/hello.world" },
+const google = createGoogleGenerativeAI();
+
+export const getMotivational = inngest.createFunction(
+  { id: "motivational-ai" },
+  { event: "motivational/motivational.ai" },
   async ({ event, step }) => {
-    await step.sleep("wait-a-moment", "10s");
-    await step.run("create-workflow", async () => {
-      return prisma.workflow.create({
-        data: {
-          name: `Workflow from inngest for ${event.data.email}`,
-        },
-      });
-    });
+    const { steps } = await step.ai.wrap(
+      "Generate Motivational Quote",
+      streamText,
+      {
+        model: google("gemini-2.5-flash"),
+        system:
+          "You are a helpful assistant that generates motivational quotes for stock traders.",
+        prompt:
+          "Generate a motivational quote for stock trading. Make it involve the psychology of trading. Keep it under 50 words.",
+      }
+    );
+
+    console.group({steps: steps, event})
+
+    return steps;
   }
 );
