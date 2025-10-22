@@ -96,13 +96,6 @@ model Verification {
   @@map("verification")
 }
 
-model Workflow {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 // 2. Trade Model - The main object for journaling
 model Trade {
   id     String @id @default(cuid())

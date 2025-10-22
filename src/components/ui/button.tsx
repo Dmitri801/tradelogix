@@ -21,7 +21,7 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         // Press variant: elevated shadow that animates to a pressed (smaller shadow + translate)
         press:
-          "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg active:shadow-sm active:translate-y-[2px] transition-[box-shadow,transform] duration-150",
+          "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:shadow-sm active:translate-y-[2px] transition-[box-shadow,transform] duration-150",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
