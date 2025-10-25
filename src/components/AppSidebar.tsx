@@ -1,19 +1,9 @@
 "use client";
 import {
-  CreditCardIcon,
   HomeIcon,
-  SettingsIcon,
-  UserIcon,
-  FolderOpenIcon,
-  HistoryIcon,
-  KeyIcon,
-  LogOutIcon,
   TrendingUpIcon,
-  StarIcon,
-  TrendingUp,
   Plus,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -25,7 +15,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button"
+import AddTrade from "../features/add-trade/components/AddTradeModal";
+import { useState } from "react";
 
 const menuItems = [
   {
@@ -48,11 +40,14 @@ const menuItems = [
 const AppSidebar = () => {
     const router = useRouter();
     const pathname = usePathname();
+    const [isDayTradeModalOpen, setIsDayTradeModalOpen] = useState(false);
 
+    const openDayTradeModal = () => setIsDayTradeModalOpen(true);
+    const closeDayTradeModal = () => setIsDayTradeModalOpen(false);
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Button variant="press" className="m-4">
+        <Button variant="press" className="m-4" onClick={openDayTradeModal}>
           <Plus />
           Add Trade
         </Button>
@@ -84,6 +79,7 @@ const AppSidebar = () => {
           </SidebarGroup>
         ))}
       </SidebarContent>
+      <AddTrade isOpen={isDayTradeModalOpen} onClose={closeDayTradeModal} />
     </Sidebar>
   );
 };

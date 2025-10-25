@@ -44,8 +44,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
   Trade         Trade[]
-  Strategy      Strategy[]
-  Tag           Tag[]
+  // Strategy      Strategy[]
+  // Tag           Tag[]
 
   @@unique([email])
   @@map("user")
@@ -107,83 +107,92 @@ model Trade {
   assetType AssetType
   direction TradeDirection
   status    TradeStatus    @default(OPEN)
-  size      Float // Shares/Units/Contracts traded
+  size      Float? // Shares/Units/Contracts traded
+  strike    Float? // For options trading
+  target    Float? // Target price
+  stopLoss  Float? // Stop-Loss price
 
-  // --- Execution & Timing ---
-  entryDate       DateTime // When the first entry order was filled
-  exitDate        DateTime? // When the final exit order was filled (if CLOSED)
-  entryPrice      Float
-  exitPrice       Float? // Final exit price (if CLOSED)
-  durationMinutes Int? // Calculated from exitDate - entryDate
+  // // --- Execution & Timing ---
+  // entryDate       DateTime // When the first entry order was filled
+  // exitDate        DateTime? // When the final exit order was filled (if CLOSED)
+  // entryPrice      Float
+  // exitPrice       Float? // Final exit price (if CLOSED)
+  // durationMinutes Int? // Calculated from exitDate - entryDate
 
-  // --- Financial & Risk ---
-  fees            Float  @default(0) // Commissions, slippage, etc.
-  pnlAbsolute     Float? // Profit/Loss in currency (calculated)
-  pnlPercentage   Float? // Profit/Loss as a percentage of risk or capital
-  stopLossPrice   Float? // Initial Stop Loss
-  takeProfitPrice Float? // Initial Take Profit
-  riskPerTrade    Float? // Dollar amount risked (e.g., $100)
-  riskRewardRatio Float? // Calculated R-multiple (e.g., 2.5R)
+  // // --- Market Context ---
+  // entryTimeframe  String? // e.g., "5min", "15min", "1h"
+  // exitTimeframe   String? // e.g., "5min", "15min", "1h"
+  // marketCondition String? // e.g., "High Volatility", "Earnings Season"
+  // setupType       String? // e.g., "Breakout", "Reversal", "Trend Continuation"
 
-  // --- Journaling & Context ---
-  notes        String? @db.Text // Detailed thoughts, reflections, and lesson learned
-  preTradePlan String? @db.Text // Why I took the trade (before entry)
+  // // --- Financial & Risk ---
+  // fees            Float  @default(0) // Commissions, slippage, etc.
+  // pnlAbsolute     Float? // Profit/Loss in currency (calculated)
+  // pnlPercentage   Float? // Profit/Loss as a percentage of risk or capital
+  // stopLossPrice   Float? // Initial Stop Loss
+  // takeProfitPrice Float? // Initial Take Profit
+  // riskPerTrade    Float? // Dollar amount risked (e.g., $100)
+  // riskRewardRatio Float? // Calculated R-multiple (e.g., 2.5R)
 
-  // Relations
-  strategyId String? // Link to the strategy used
-  strategy   Strategy? @relation(fields: [strategyId], references: [id])
+  // // --- Journaling & Context ---
+  // notes        String? @db.Text // Detailed thoughts, reflections, and lesson learned
+  // preTradePlan String? @db.Text // Why I took the trade (before entry)
 
-  // Many-to-Many relation with Tags (for filtering, e.g., "Breakout", "Psychological Error")
-  tags TradeTag[]
+  // // Relations
+  // strategyId String? // Link to the strategy used
+  // strategy   Strategy? @relation(fields: [strategyId], references: [id])
 
-  // For storing chart screenshots or relevant documents
-  imageUrls String[] // Array of URLs (You would upload files to cloud storage like S3/Firebase Storage)
+  // // Many-to-Many relation with Tags (for filtering, e.g., "Breakout", "Psychological Error")
+  // tags TradeTag[]
+
+  // // For storing chart screenshots or relevant documents
+  // imageUrls String[] // Array of URLs (You would upload files to cloud storage like S3/Firebase Storage)
 
   // --- Audit Fields ---
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Unique constraint to prevent accidental duplicate entries (optional, but good practice)
-  @@unique([userId, symbol, entryDate])
-  @@index([userId, symbol, entryDate])
+  // // Unique constraint to prevent accidental duplicate entries (optional, but good practice)
+  // @@unique([userId, symbol, entryDate])
+  // @@index([userId, symbol, entryDate])
 }
 
 // 3. Strategy Model - For organizing and analyzing performance by system
-model Strategy {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+// model Strategy {
+//   id     String @id @default(cuid())
+//   userId String
+//   user   User   @relation(fields: [userId], references: [id])
 
-  name        String // e.g., "Morning Scalp", "Late Day Breakout"
-  description String? @db.Text
-  isActive    Boolean @default(true)
+//   name        String // e.g., "Morning Scalp", "Late Day Breakout"
+//   description String? @db.Text
+//   isActive    Boolean @default(true)
 
-  trades Trade[] // Trades associated with this strategy
+//   trades Trade[] // Trades associated with this strategy
 
-  @@unique([userId, name])
-}
+//   @@unique([userId, name])
+// }
 
 // 4. Tag Model - For flexible filtering (e.g., market condition, emotion)
-model Tag {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+// model Tag {
+//   id     String @id @default(cuid())
+//   userId String
+//   user   User   @relation(fields: [userId], references: [id])
 
-  name     String // e.g., "Emotional Trading", "High Volatility", "Successful Retest"
-  colorHex String? // Optional color for UI display
+//   name     String // e.g., "Emotional Trading", "High Volatility", "Successful Retest"
+//   colorHex String? // Optional color for UI display
 
-  trades TradeTag[] // Relation to join table
+//   trades TradeTag[] // Relation to join table
 
-  @@unique([userId, name])
-}
+//   @@unique([userId, name])
+// }
 
-// Join table for many-to-many relation between Trade and Tag
-model TradeTag {
-  trade   Trade  @relation(fields: [tradeId], references: [id])
-  tradeId String
+// // Join table for many-to-many relation between Trade and Tag
+// model TradeTag {
+//   trade   Trade  @relation(fields: [tradeId], references: [id])
+//   tradeId String
 
-  tag   Tag    @relation(fields: [tagId], references: [id])
-  tagId String
+//   tag   Tag    @relation(fields: [tagId], references: [id])
+//   tagId String
 
-  @@id([tradeId, tagId])
-}
+//   @@id([tradeId, tagId])
+// }

@@ -20,8 +20,6 @@ export const getMotivational = inngest.createFunction(
       }
     );
 
-    console.group({steps: steps, event})
-
     return steps;
   }
 );

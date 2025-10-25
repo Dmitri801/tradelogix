@@ -1,4 +1,5 @@
-;import AccountDropdown from "@/components/AccountDropdown";
+"use server";
+import AccountDropdown from "@/components/AccountDropdown";
 import { requireAuth } from "@/lib/auth-utils";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import ClientSidebar from "@/components/ClientSidebar";
