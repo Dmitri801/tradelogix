@@ -12,6 +12,7 @@ export const appRouter = createTRPCRouter({
       z.object({
         market: z.string(),
         symbol: z.string(),
+        expectedHoldTime: z.enum(["DAY", "SWING", "LONG"]),
         target: z.number().optional(),
         stopLoss: z.number().optional(),
         direction: z.enum(["LONG", "SHORT"]).optional(),
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
         data: {
           userId: ctx.auth.user.id,
           symbol: input.symbol,
+          expectedHoldTime: input.expectedHoldTime,
           assetType: input.market.toUpperCase() as AssetType,
           direction: input.direction as TradeDirection,
           target: input.target,

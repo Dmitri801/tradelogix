@@ -16,6 +16,12 @@ enum TradeDirection {
   SHORT
 }
 
+enum ExpectedHoldTime {
+  DAY
+  SWING
+  LONG
+}
+
 enum TradeStatus {
   OPEN
   CLOSED // Fully exited
@@ -34,13 +40,13 @@ datasource db {
 }
 
 model User {
-  id            String     @id
+  id            String    @id
   name          String
   email         String
-  emailVerified Boolean    @default(false)
+  emailVerified Boolean   @default(false)
   image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
   Trade         Trade[]
@@ -103,14 +109,15 @@ model Trade {
   user   User   @relation(fields: [userId], references: [id])
 
   // --- Trade Basics ---
-  symbol    String // e.g., AAPL, EURUSD, BTCUSD
-  assetType AssetType
-  direction TradeDirection
-  status    TradeStatus    @default(OPEN)
-  size      Float? // Shares/Units/Contracts traded
-  strike    Float? // For options trading
-  target    Float? // Target price
-  stopLoss  Float? // Stop-Loss price
+  symbol           String // e.g., AAPL, EURUSD, BTCUSD
+  assetType        AssetType        @default(STOCK)
+  expectedHoldTime ExpectedHoldTime @default(DAY)
+  direction        TradeDirection
+  status           TradeStatus      @default(OPEN)
+  size             Float? // Shares/Units/Contracts traded
+  strike           Float? // For options trading
+  target           Float? // Target price
+  stopLoss         Float? // Stop-Loss price
 
   // // --- Execution & Timing ---
   // entryDate       DateTime // When the first entry order was filled

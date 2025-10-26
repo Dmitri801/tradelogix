@@ -7,26 +7,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
+import AddTradeAction from "./AddTradeAction";
 const AddTradeTable = () => {
 
   return (
-    <Table>
-      <TableCaption>Add Trade Summary</TableCaption>
+    <Table className="w-[90%] mx-auto my-4">
       <TableHeader>
         <TableRow>
-          <TableHead>Field</TableHead>
-          <TableHead>Value</TableHead>
+          <TableHead>Action</TableHead>
+          <TableHead>Date/Time</TableHead>
+           <TableHead>Quantity</TableHead>
+          <TableHead>Price</TableHead>
+          <TableHead>Fee</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         <TableRow>
-          <TableCell>Market</TableCell>
-          <TableCell>NASDAQ</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>Symbol</TableCell>
-          <TableCell>AAPL</TableCell>
+          <AddTradeAction />
         </TableRow>
       </TableBody>
     </Table>
