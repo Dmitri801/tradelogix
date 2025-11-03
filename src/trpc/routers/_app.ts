@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { AssetType, TradeDirection } from "@/generated/prisma";
+import { getTradeDirection } from "@/trpc/utils";
 import z from "zod";
 
 export const appRouter = createTRPCRouter({
@@ -16,28 +17,63 @@ export const appRouter = createTRPCRouter({
         target: z.number().optional(),
         stopLoss: z.number().optional(),
         direction: z.enum(["LONG", "SHORT"]).optional(),
+        optionType: z.string().optional(),
         strike: z.number().optional(),
+        actions: z.array(
+          z.object({
+            actionType: z.enum(["BUY", "SELL"]),
+            price: z.number(),
+            size: z.number(),
+            fees: z.number().optional(),
+            timestamp: z.string().or(z.date()).transform((val) => 
+              typeof val === 'string' ? new Date(val) : val
+            ),
+          })
+        ),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const direction = getTradeDirection(
+        input.market,
+        input.optionType,
+        input.actions[0]
+      );
+
       const trade = await prisma.trade.create({
         data: {
           userId: ctx.auth.user.id,
           symbol: input.symbol,
           expectedHoldTime: input.expectedHoldTime,
           assetType: input.market.toUpperCase() as AssetType,
-          direction: input.direction as TradeDirection,
+          direction,
           target: input.target,
           stopLoss: input.stopLoss,
+          optionType: input.optionType,
           strike: input.strike,
+          actions: {
+            create: input.actions.map((action) => ({
+              actionType: action.actionType,
+              price: action.price,
+              size: action.size,
+              fees: action.fees,
+              timestamp: action.timestamp,
+            })),
+          },
         },
+        include: {
+          actions: true, // Include actions in the response so we can see what was actually created
+        }
       });
+      
       return trade;
     }),
   getTrades: protectedProcedure.query(async ({ ctx }) => {
     const trades = await prisma.trade.findMany({
       where: {
         userId: ctx.auth.user.id,
+      },
+      include: {
+        actions: true, // Include the actions that belong to each trade
       },
       orderBy: {
         createdAt: "desc",

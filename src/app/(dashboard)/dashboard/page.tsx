@@ -10,6 +10,7 @@ const Page = () => {
   }
 
   const trades = dayTradeQuery.data;
+  console.log({trades})
 
   return (
     <div>

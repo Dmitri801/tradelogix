@@ -23,14 +23,13 @@ import { AssetType } from "@/generated/prisma";
 const AddTradeGeneral: React.FC = () => {
   const { control, watch } = useFormContext();
   const market = watch("market");
-
   return (
     <section
       aria-label="day-trade-general"
       className="p-4 grid grid-cols-1 gap-2"
     >
       {/* Grid layout: Market | Symbol | Target | Stop-Loss | Side */}
-      <div className="grid grid-cols-[160px_1fr_1fr_1fr_80px] gap-4 items-start">
+      <div className="grid grid-cols-[160px_1fr_1fr_1fr] gap-4 items-start">
         {/* Market select */}
         <FormField
           control={control}
@@ -133,7 +132,7 @@ const AddTradeGeneral: React.FC = () => {
        
       </div>
       {/* Row Two */}
-      <div className="grid grid-cols-[160px_1fr_1fr_1fr_80px] gap-4 items-center">
+      <div className="grid grid-cols-[160px_1fr_1fr_1fr] gap-4 items-center">
         {/* Hold time */}
         <FormField
           control={control}
@@ -192,8 +191,8 @@ const AddTradeGeneral: React.FC = () => {
           {market === AssetType.OPTION && (
           <FormField
             control={control}
-            name="direction"
-            render={({ field }) => (
+            name="optionType"
+            render={({ field }) =>  (
               <div className="flex flex-col gap-2 items-end">
                 <FormLabel className="text-xs text-muted-foreground invisible">
                   side
@@ -202,17 +201,17 @@ const AddTradeGeneral: React.FC = () => {
                   <Button
                     type="button"
                     onClick={() =>
-                      field.onChange(field.value === "LONG" ? "SHORT" : "LONG")
+                      field.onChange(field.value === "CALL" ? "PUT" : "CALL")
                     }
                     className={cn(
                       "rounded-full bg-emerald-500/90 text-white px-4 py-1.5 text-sm font-medium shadow-sm w-full h-auto hover:bg-emerald-600/90",
                       {
                         "bg-red-500/90 hover:bg-red-600/90":
-                          field.value === "SHORT",
+                          field.value === "PUT",
                       }
                     )}
                   >
-                    {field.value === "LONG" ? "CALL" : "PUT"}
+                    {field.value}
                   </Button>
                 </FormControl>
                 <FormMessage className="min-h-[1.25rem]" />

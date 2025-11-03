@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
+import { useEffect } from "react";
 
 import DayTradeGeneral from "./AddTradeGeneral";
 import { AssetType, ExpectedHoldTime } from "@/generated/prisma/wasm";
@@ -36,11 +37,21 @@ const tradeSchema = z
     stopLoss: z.number().optional(),
     direction: z.enum(["LONG", "SHORT"]).optional(),
     strike: z.number().min(0.01, "Strike must be greater than 0").optional(),
+    optionType: z.string().optional(),
     expectedHoldTime: z.enum([
       ExpectedHoldTime.DAY,
       ExpectedHoldTime.SWING,
       ExpectedHoldTime.LONG,
     ]),
+    actions: z.array(
+      z.object({
+        actionType: z.enum(["BUY", "SELL"]),
+        price: z.number().min(0.01, "Price must be greater than 0"),
+        size: z.number().min(0.01, "Size must be greater than 0"),
+        fees: z.number().optional(),
+        timestamp: z.date(),
+      })
+    ),  
   })
   .refine(
     (data) => {
@@ -69,16 +80,36 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
   // Initialize react-hook-form
   const tradeForm = useForm<TradeFormData>({
     resolver: zodResolver(tradeSchema),
+    mode: 'all', // Validate all fields and show all errors simultaneously
     defaultValues: {
       market: AssetType.OPTION,
       symbol: "",
       target: undefined,
       stopLoss: undefined,
-      direction: "LONG",
+      optionType: "CALL", 
       strike: undefined,
       expectedHoldTime: ExpectedHoldTime.DAY,
+      actions: [{
+        actionType: "BUY",
+        price: undefined,
+        size: undefined,
+        fees: undefined,
+        timestamp: new Date(),
+      }],
     },
   });
+
+
+  // Watch the actions array to pass to AddTradeTable
+  const actions = tradeForm.watch("actions");
+
+  // Update timestamp when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      tradeForm.setValue("actions.0.timestamp", new Date());
+    }
+  }, [isOpen, tradeForm]);
+
 
   const handleModalClose = () => {
     tradeForm.reset();
@@ -117,7 +148,7 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
                   </CardHeader>
                   <CardContent className="grid gap-6">
                     <DayTradeGeneral />
-                    <AddTradeTable />
+                    <AddTradeTable actions={actions} />
                   </CardContent>
                   <CardFooter>
                     <Button type="submit" disabled={addTradeMutation.isPending}>

@@ -118,6 +118,8 @@ model Trade {
   strike           Float? // For options trading
   target           Float? // Target price
   stopLoss         Float? // Stop-Loss price
+  optionType       String? // e.g., "CALL", "PUT" for options trading
+  actions          TradeAction[] // Array of trade actions (entries, exits, modifications)
 
   // // --- Execution & Timing ---
   // entryDate       DateTime // When the first entry order was filled
@@ -162,6 +164,18 @@ model Trade {
   // // Unique constraint to prevent accidental duplicate entries (optional, but good practice)
   // @@unique([userId, symbol, entryDate])
   // @@index([userId, symbol, entryDate])
+}
+
+// 2a. TradeAction Model - To log each action taken on a trade
+model TradeAction {
+  id        String    @id @default(cuid())
+  tradeId   String
+  trade     Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  actionType String   // e.g., BUY, SELL
+  price     Float
+  size      Float    
+  fees      Float    @default(0)
+  timestamp DateTime  
 }
 
 // 3. Strategy Model - For organizing and analyzing performance by system
