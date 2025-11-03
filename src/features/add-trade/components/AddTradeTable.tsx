@@ -10,18 +10,12 @@ import {
 import AddTradeAction from "./AddTradeAction";
 import { useFormContext } from "react-hook-form";
 import { cn } from "@/lib/utils";
+import { TradeAction } from "@/generated/prisma";
 
-// Trade Action type (matching the schema)
-type TradeAction = {
-  actionType: "BUY" | "SELL";
-  price: number;
-  size: number;
-  fees?: number;
-  timestamp: Date;
-};
+type TradeActionInput = Omit<TradeAction, "id" | "tradeId" | "fees"> & { fees?: number };
 
 interface AddTradeTableProps {
-  actions?: TradeAction[];
+  actions?: TradeActionInput[];
 }
 const AddTradeTable = ({
   actions

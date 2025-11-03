@@ -20,18 +20,12 @@ import {
 import { useFormContext } from "react-hook-form";
 import { TableCell } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { TradeAction } from "@/generated/prisma";
 
-// Trade Action type based on the schema
-type TradeAction = {
-  actionType: "BUY" | "SELL";
-  price: number;
-  size: number;
-  fees?: number;
-  timestamp: Date;
-};
+type TradeActionInput = Omit<TradeAction, "id" | "tradeId" | "fees"> & { fees?: number };
 
 interface AddTradeActionProps {
-  action: TradeAction;
+  action: TradeActionInput;
   index: number; // For field naming in forms
 }
 
