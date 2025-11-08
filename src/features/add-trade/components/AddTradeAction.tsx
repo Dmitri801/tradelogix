@@ -44,7 +44,7 @@ const AddTradeAction: React.FC<AddTradeActionProps> = ({
         name={`actions.${index}.actionType`}
         render={({ field }) => (
           <div className="flex flex-col gap-2">
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value ?? undefined}>
               <FormControl>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="BUY" />

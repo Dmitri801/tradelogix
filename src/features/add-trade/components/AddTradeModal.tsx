@@ -51,7 +51,7 @@ const tradeSchema = z
         fees: z.number().optional(),
         timestamp: z.date(),
       })
-    ),  
+    ).min(1, "At least one trade action is required"),  
   })
   .refine(
     (data) => {
