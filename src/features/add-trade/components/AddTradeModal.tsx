@@ -43,15 +43,17 @@ const tradeSchema = z
       ExpectedHoldTime.SWING,
       ExpectedHoldTime.LONG,
     ]),
-    actions: z.array(
-      z.object({
-        actionType: z.enum(["BUY", "SELL"]),
-        price: z.number().min(0.01, "Price must be greater than 0"),
-        size: z.number().min(0.01, "Size must be greater than 0"),
-        fees: z.number().optional(),
-        timestamp: z.date(),
-      })
-    ).min(1, "At least one trade action is required"),  
+    actions: z
+      .array(
+        z.object({
+          actionType: z.enum(["BUY", "SELL"]),
+          price: z.number().min(0.01, "Price must be greater than 0"),
+          size: z.number().min(0.01, "Size must be greater than 0"),
+          fees: z.number().optional(),
+          timestamp: z.date(),
+        })
+      )
+      .min(1, "At least one trade action is required"),
   })
   .refine(
     (data) => {
@@ -80,25 +82,26 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
   // Initialize react-hook-form
   const tradeForm = useForm<TradeFormData>({
     resolver: zodResolver(tradeSchema),
-    mode: 'all', // Validate all fields and show all errors simultaneously
+    mode: "all", // Validate all fields and show all errors simultaneously
     defaultValues: {
       market: AssetType.OPTION,
       symbol: "",
       target: undefined,
       stopLoss: undefined,
-      optionType: "CALL", 
+      optionType: "CALL",
       strike: undefined,
       expectedHoldTime: ExpectedHoldTime.DAY,
-      actions: [{
-        actionType: "BUY",
-        price: undefined,
-        size: undefined,
-        fees: undefined,
-        timestamp: new Date(),
-      }],
+      actions: [
+        {
+          actionType: "BUY",
+          price: undefined,
+          size: undefined,
+          fees: undefined,
+          timestamp: new Date(),
+        },
+      ],
     },
   });
-
 
   // Watch the actions array to pass to AddTradeTable
   const actions = tradeForm.watch("actions");
@@ -109,7 +112,6 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
       tradeForm.setValue("actions.0.timestamp", new Date());
     }
   }, [isOpen, tradeForm]);
-
 
   const handleModalClose = () => {
     tradeForm.reset();
@@ -132,7 +134,7 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
   return (
     <Dialog open={isOpen} onOpenChange={handleModalClose}>
       <Form {...tradeForm}>
-        <DialogContent className="sm:max-w-[425px]" fullscreen>
+        <DialogContent className="sm:max-w-[425px] overflow-scroll" fullscreen>
           <DialogTitle className="sr-only">Add New Trade</DialogTitle>
           <form onSubmit={tradeForm.handleSubmit(onSubmit)}>
             <Tabs defaultValue="trade" className="w-full">
