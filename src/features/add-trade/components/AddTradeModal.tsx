@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,32 +18,54 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
+import { useEffect } from "react";
 
-import DayTradeGeneral from "./DayTradeGeneral";
-import { AssetType } from "@/generated/prisma/wasm";
+import DayTradeGeneral from "./AddTradeGeneral";
+import { AssetType, ExpectedHoldTime } from "@/generated/prisma/wasm";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import AddTradeTable from "./AddTradeTable";
 
 // Form schema
-const tradeSchema = z.object({
-  market: z.string().min(1, "Please select a market"),
-  symbol: z.string().min(1, "Symbol is required").max(10, "Symbol must be 10 characters or less"),
-  target: z.number().optional(),
-  stopLoss: z.number().optional(),
-  direction: z.enum(["LONG", "SHORT"]).optional(),
-  strike: z.number().min(0.01, "Strike must be greater than 0").optional(),
-}).refine(
-  (data) => {
-    // If market is OPTION, strike is required
-    if (data.market === "OPTION") {
-      return data.strike !== undefined && data.strike > 0;
+const tradeSchema = z
+  .object({
+    market: z.string().min(1, "Please select a market"),
+    symbol: z
+      .string()
+      .min(1, "Symbol is required")
+      .max(10, "Symbol must be 10 characters or less"),
+    target: z.number().optional(),
+    stopLoss: z.number().optional(),
+    direction: z.enum(["LONG", "SHORT"]).optional(),
+    strike: z.number().min(0.01, "Strike must be greater than 0").optional(),
+    optionType: z.string().optional(),
+    expectedHoldTime: z.enum([
+      ExpectedHoldTime.DAY,
+      ExpectedHoldTime.SWING,
+      ExpectedHoldTime.LONG,
+    ]),
+    actions: z.array(
+      z.object({
+        actionType: z.enum(["BUY", "SELL"]),
+        price: z.number().min(0.01, "Price must be greater than 0"),
+        size: z.number().min(0.01, "Size must be greater than 0"),
+        fees: z.number().optional(),
+        timestamp: z.date(),
+      })
+    ).min(1, "At least one trade action is required"),  
+  })
+  .refine(
+    (data) => {
+      // If market is OPTION, strike is required
+      if (data.market === "OPTION") {
+        return data.strike !== undefined && data.strike > 0;
+      }
+      return true;
+    },
+    {
+      message: "Strike is required for options",
+      path: ["strike"], // This tells Zod which field to show the error on
     }
-    return true;
-  },
-  {
-    message: "Strike is required for options",
-    path: ["strike"], // This tells Zod which field to show the error on
-  }
-);
+  );
 
 type TradeFormData = z.infer<typeof tradeSchema>;
 interface AddTradeModalProps {
@@ -58,20 +80,45 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
   // Initialize react-hook-form
   const tradeForm = useForm<TradeFormData>({
     resolver: zodResolver(tradeSchema),
+    mode: 'all', // Validate all fields and show all errors simultaneously
     defaultValues: {
       market: AssetType.OPTION,
       symbol: "",
       target: undefined,
       stopLoss: undefined,
-      direction: "LONG",
+      optionType: "CALL", 
       strike: undefined,
+      expectedHoldTime: ExpectedHoldTime.DAY,
+      actions: [{
+        actionType: "BUY",
+        price: undefined,
+        size: undefined,
+        fees: undefined,
+        timestamp: new Date(),
+      }],
     },
   });
+
+
+  // Watch the actions array to pass to AddTradeTable
+  const actions = tradeForm.watch("actions");
+
+  // Update timestamp when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      tradeForm.setValue("actions.0.timestamp", new Date());
+    }
+  }, [isOpen, tradeForm]);
+
+
+  const handleModalClose = () => {
+    tradeForm.reset();
+    onClose();
+  };
 
   const onSubmit = (data: TradeFormData) => {
     addTradeMutation.mutate(data, {
       onSuccess: () => {
-        console.log("Trade saved successfully");
         // Invalidate and refetch the getTrades query
         queryClient.invalidateQueries({ queryKey: [["getTrades"]] });
         tradeForm.reset();
@@ -83,7 +130,7 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
     });
   };
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleModalClose}>
       <Form {...tradeForm}>
         <DialogContent className="sm:max-w-[425px]" fullscreen>
           <DialogTitle className="sr-only">Add New Trade</DialogTitle>
@@ -97,10 +144,11 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Trade</CardTitle>
-                    <CardDescription>Plan your trade</CardDescription>
+                    <CardDescription>Add your trade</CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-6">
                     <DayTradeGeneral />
+                    <AddTradeTable actions={actions} />
                   </CardContent>
                   <CardFooter>
                     <Button type="submit" disabled={addTradeMutation.isPending}>
@@ -113,10 +161,7 @@ const AddTradeModal: React.FC<AddTradeModalProps> = ({ isOpen, onClose }) => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Journal</CardTitle>
-                    <CardDescription>
-                      Change your journal here. After saving, you&apos;ll be
-                      logged out.
-                    </CardDescription>
+                    <CardDescription>Journal your trade</CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-6">
                     <div className="grid gap-3">

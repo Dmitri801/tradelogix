@@ -16,6 +16,12 @@ enum TradeDirection {
   SHORT
 }
 
+enum ExpectedHoldTime {
+  DAY
+  SWING
+  LONG
+}
+
 enum TradeStatus {
   OPEN
   CLOSED // Fully exited
@@ -34,13 +40,13 @@ datasource db {
 }
 
 model User {
-  id            String     @id
+  id            String    @id
   name          String
   email         String
-  emailVerified Boolean    @default(false)
+  emailVerified Boolean   @default(false)
   image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
   Trade         Trade[]
@@ -103,14 +109,17 @@ model Trade {
   user   User   @relation(fields: [userId], references: [id])
 
   // --- Trade Basics ---
-  symbol    String // e.g., AAPL, EURUSD, BTCUSD
-  assetType AssetType
-  direction TradeDirection
-  status    TradeStatus    @default(OPEN)
-  size      Float? // Shares/Units/Contracts traded
-  strike    Float? // For options trading
-  target    Float? // Target price
-  stopLoss  Float? // Stop-Loss price
+  symbol           String // e.g., AAPL, EURUSD, BTCUSD
+  assetType        AssetType        @default(STOCK)
+  expectedHoldTime ExpectedHoldTime @default(DAY)
+  direction        TradeDirection
+  status           TradeStatus      @default(OPEN)
+  size             Float? // Shares/Units/Contracts traded
+  strike           Float? // For options trading
+  target           Float? // Target price
+  stopLoss         Float? // Stop-Loss price
+  optionType       String? // e.g., "CALL", "PUT" for options trading
+  actions          TradeAction[] // Array of trade actions (entries, exits, modifications)
 
   // // --- Execution & Timing ---
   // entryDate       DateTime // When the first entry order was filled
@@ -155,6 +164,18 @@ model Trade {
   // // Unique constraint to prevent accidental duplicate entries (optional, but good practice)
   // @@unique([userId, symbol, entryDate])
   // @@index([userId, symbol, entryDate])
+}
+
+// 2a. TradeAction Model - To log each action taken on a trade
+model TradeAction {
+  id        String    @id @default(cuid())
+  tradeId   String
+  trade     Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  actionType String   // e.g., BUY, SELL
+  price     Float
+  size      Float    
+  fees      Float    @default(0)
+  timestamp DateTime  
 }
 
 // 3. Strategy Model - For organizing and analyzing performance by system

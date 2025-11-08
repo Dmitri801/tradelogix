@@ -7,27 +7,58 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import AddTradeAction from "./AddTradeAction";
+import { useFormContext } from "react-hook-form";
+import { cn } from "@/lib/utils";
+import { TradeAction } from "@/generated/prisma";
 
-const AddTradeTable = () => {
+type TradeActionInput = Omit<TradeAction, "id" | "tradeId" | "fees"> & { fees?: number };
+
+interface AddTradeTableProps {
+  actions?: TradeActionInput[];
+}
+const AddTradeTable = ({
+  actions
+}: AddTradeTableProps) => {
+  const { formState: { errors } } = useFormContext();
+  
+  // Check if there are any validation errors for quantity (size) or price fields
+  const hasQuantityError = actions?.some((_, index) => 
+    (errors as any)?.actions?.[index]?.size
+  );
+  const hasPriceError = actions?.some((_, index) => 
+    (errors as any)?.actions?.[index]?.price
+  );
 
   return (
-    <Table>
-      <TableCaption>Add Trade Summary</TableCaption>
+    <Table className="w-[90%] mx-auto my-4 table-fixed">
       <TableHeader>
         <TableRow>
-          <TableHead>Field</TableHead>
-          <TableHead>Value</TableHead>
+          <TableHead className="w-[120px]">Action</TableHead>
+          <TableHead className="w-auto">Date/Time</TableHead>
+          <TableHead className={cn(
+            "w-[120px]",
+            hasQuantityError && "text-destructive"
+          )}>
+            Quantity
+          </TableHead>
+          <TableHead className={cn(
+            "w-[120px]",
+            hasPriceError && "text-destructive"
+          )}>
+            Price
+          </TableHead>
+          <TableHead className="w-[120px]">Fee</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow>
-          <TableCell>Market</TableCell>
-          <TableCell>NASDAQ</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>Symbol</TableCell>
-          <TableCell>AAPL</TableCell>
-        </TableRow>
+        {actions?.map((action, index) => {
+          return (
+            <TableRow key={index}>
+              <AddTradeAction action={action} index={index} />
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   )

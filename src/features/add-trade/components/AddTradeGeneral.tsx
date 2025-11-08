@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   FormField,
-  FormItem,
   FormLabel,
   FormControl,
   FormMessage,
@@ -21,24 +20,25 @@ import { useFormContext, Controller } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { AssetType } from "@/generated/prisma";
 
-const DayTradeGeneral: React.FC = () => {
+const AddTradeGeneral: React.FC = () => {
   const { control, watch } = useFormContext();
   const market = watch("market");
-
   return (
     <section
       aria-label="day-trade-general"
       className="p-4 grid grid-cols-1 gap-2"
     >
       {/* Grid layout: Market | Symbol | Target | Stop-Loss | Side */}
-      <div className="grid grid-cols-[160px_1fr_1fr_1fr_auto] gap-4 items-start">
+      <div className="grid grid-cols-[160px_1fr_1fr_1fr] gap-4 items-start">
         {/* Market select */}
         <FormField
           control={control}
           name="market"
           render={({ field }) => (
             <div className="flex flex-col gap-2">
-              <FormLabel className="text-xs text-muted-foreground">Market</FormLabel>
+              <FormLabel className="text-xs text-muted-foreground">
+                Market
+              </FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger className="w-full">
@@ -60,7 +60,9 @@ const DayTradeGeneral: React.FC = () => {
           name="symbol"
           render={({ field }) => (
             <div className="flex flex-col gap-2">
-              <FormLabel className="text-xs text-muted-foreground">Symbol</FormLabel>
+              <FormLabel className="text-xs text-muted-foreground">
+                Symbol
+              </FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -79,7 +81,9 @@ const DayTradeGeneral: React.FC = () => {
           name="target"
           render={({ field }) => (
             <div className="flex flex-col gap-2">
-              <FormLabel className="text-xs text-muted-foreground">Target</FormLabel>
+              <FormLabel className="text-xs text-muted-foreground">
+                Target
+              </FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -104,7 +108,9 @@ const DayTradeGeneral: React.FC = () => {
           name="stopLoss"
           render={({ field }) => (
             <div className="flex flex-col gap-2">
-              <FormLabel className="text-xs text-muted-foreground">Stop-Loss</FormLabel>
+              <FormLabel className="text-xs text-muted-foreground">
+                Stop-Loss
+              </FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -123,13 +129,70 @@ const DayTradeGeneral: React.FC = () => {
             </div>
           )}
         />
+       
+      </div>
+      {/* Row Two */}
+      <div className="grid grid-cols-[160px_1fr_1fr_1fr] gap-4 items-center">
+        {/* Hold time */}
+        <FormField
+          control={control}
+          name="expectedHoldTime"
+          render={({ field }) => (
+            <div className="flex flex-col gap-2">
+              <FormLabel className="text-xs text-muted-foreground">
+                Hold Time
+              </FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="DAY" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="DAY">DAY</SelectItem>
+                  <SelectItem value="SWING">SWING</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        />
+        <div>
+          {market === AssetType.OPTION && (
+            <FormField
+              control={control}
+              name="strike"
+              render={({ field }) => (
+                <div className="flex flex-col gap-2">
+                  <FormLabel className="text-xs text-muted-foreground">
+                    Strike
+                  </FormLabel>
 
-        {/* Side badge (LONG/SHORT) */}
-        {market === AssetType.OPTION && (
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder=""
+                      type="number"
+                      step="0.01"
+                      className="w-full"
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? undefined : Number(value));
+                      }}
+                      aria-label="strike"
+                    />
+                  </FormControl>
+                </div>
+              )}
+            />
+          )}
+        </div>
+        <div>
+          {market === AssetType.OPTION && (
           <FormField
             control={control}
-            name="direction"
-            render={({ field }) => (
+            name="optionType"
+            render={({ field }) =>  (
               <div className="flex flex-col gap-2 items-end">
                 <FormLabel className="text-xs text-muted-foreground invisible">
                   side
@@ -138,17 +201,17 @@ const DayTradeGeneral: React.FC = () => {
                   <Button
                     type="button"
                     onClick={() =>
-                      field.onChange(field.value === "LONG" ? "SHORT" : "LONG")
+                      field.onChange(field.value === "CALL" ? "PUT" : "CALL")
                     }
                     className={cn(
-                      "rounded-full bg-emerald-500/90 text-white px-4 py-1.5 text-sm font-medium shadow-sm w-20 h-auto hover:bg-emerald-600/90",
+                      "rounded-full bg-emerald-500/90 text-white px-4 py-1.5 text-sm font-medium shadow-sm w-full h-auto hover:bg-emerald-600/90",
                       {
                         "bg-red-500/90 hover:bg-red-600/90":
-                          field.value === "SHORT",
+                          field.value === "PUT",
                       }
                     )}
                   >
-                    {field.value === "LONG" ? "LONG" : "SHORT"}
+                    {field.value}
                   </Button>
                 </FormControl>
                 <FormMessage className="min-h-[1.25rem]" />
@@ -156,41 +219,12 @@ const DayTradeGeneral: React.FC = () => {
             )}
           />
         )}
-      </div>
-      <div className="grid grid-cols-[160px_1fr_1fr_1fr_auto] gap-4 items-center">
-        <span className="text-xs text-muted-foreground invisible">side</span>
-        <span className="text-xs text-muted-foreground invisible">side</span>
-        <span className="text-xs text-muted-foreground invisible">side</span>
-        <span className="text-xs text-muted-foreground invisible">side</span>
-        {market === AssetType.OPTION && (
-          <FormField
-            control={control}
-            name="strike"
-            render={({ field }) => (
-              <div className="flex flex-col gap-2">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder=""
-                    type="number"
-                    step="0.01"
-                    className="w-20"
-                    value={field.value || ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                    aria-label="strike"
-                  />
-                </FormControl>
-                <FormLabel className="text-xs text-muted-foreground">Strike</FormLabel>
-              </div>
-            )}
-          />
-        )}
+        </div>
+        <div></div>
+        <div></div>
       </div>
     </section>
   );
 };
 
-export default DayTradeGeneral;
+export default AddTradeGeneral;
