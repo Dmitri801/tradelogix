@@ -47,7 +47,7 @@ const AppSidebar = () => {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Button variant="press" className="m-4" onClick={openDayTradeModal}>
+        <Button variant="interactive" className="m-4" onClick={openDayTradeModal}>
           <Plus />
           Add Trade
         </Button>

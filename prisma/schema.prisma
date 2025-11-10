@@ -115,11 +115,13 @@ model Trade {
   direction        TradeDirection
   size             Float? // Shares/Units/Contracts traded
   strike           Float? // For options trading
-  target           Float? // Target price
+  target           Float? // Target price 
   stopLoss         Float? // Stop-Loss price
   optionType       String? // e.g., "CALL", "PUT" for options trading
   actions          TradeAction[] // Array of trade actions (entries, exits, modifications)
-  status           TradeStatus[] // History of status changes with timestamps
+  statusId         String? // FK to the current TradeStatus record
+  status           TradeStatusEnum @default(PENDING)
+  statusHistory    TradeStatus[] @relation(name: "StatusHistory") // History of status changes
 
   // // --- Execution & Timing ---
   // entryDate       DateTime // When the first entry order was filled
@@ -177,14 +179,14 @@ model TradeAction {
   fees       Float    @default(0)
   timestamp  DateTime
 }
-
 model TradeStatus {
   id        String          @id @default(cuid())
   tradeId   String
-  trade     Trade           @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  trade     Trade           @relation(name: "StatusHistory", fields: [tradeId], references: [id], onDelete: Cascade)
   status    TradeStatusEnum @default(PENDING)
   timestamp DateTime        @default(now())
 }
+
 
 // 3. Strategy Model - For organizing and analyzing performance by system
 // model Strategy {
