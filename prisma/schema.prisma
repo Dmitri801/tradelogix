@@ -22,7 +22,7 @@ enum ExpectedHoldTime {
   LONG
 }
 
-enum TradeStatus {
+enum TradeStatusEnum {
   OPEN
   CLOSED // Fully exited
   PENDING // Limit order or strategy is set up but not yet entered
@@ -113,13 +113,15 @@ model Trade {
   assetType        AssetType        @default(STOCK)
   expectedHoldTime ExpectedHoldTime @default(DAY)
   direction        TradeDirection
-  status           TradeStatus      @default(OPEN)
   size             Float? // Shares/Units/Contracts traded
   strike           Float? // For options trading
-  target           Float? // Target price
+  target           Float? // Target price 
   stopLoss         Float? // Stop-Loss price
   optionType       String? // e.g., "CALL", "PUT" for options trading
   actions          TradeAction[] // Array of trade actions (entries, exits, modifications)
+  statusId         String? // FK to the current TradeStatus record
+  status           TradeStatusEnum @default(PENDING)
+  statusHistory    TradeStatus[] @relation(name: "StatusHistory") // History of status changes
 
   // // --- Execution & Timing ---
   // entryDate       DateTime // When the first entry order was filled
@@ -168,15 +170,23 @@ model Trade {
 
 // 2a. TradeAction Model - To log each action taken on a trade
 model TradeAction {
-  id        String    @id @default(cuid())
-  tradeId   String
-  trade     Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
-  actionType String   // e.g., BUY, SELL
-  price     Float
-  size      Float    
-  fees      Float    @default(0)
-  timestamp DateTime  
+  id         String   @id @default(cuid())
+  tradeId    String
+  trade      Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  actionType String // e.g., BUY, SELL
+  price      Float
+  size       Float
+  fees       Float    @default(0)
+  timestamp  DateTime
 }
+model TradeStatus {
+  id        String          @id @default(cuid())
+  tradeId   String
+  trade     Trade           @relation(name: "StatusHistory", fields: [tradeId], references: [id], onDelete: Cascade)
+  status    TradeStatusEnum @default(PENDING)
+  timestamp DateTime        @default(now())
+}
+
 
 // 3. Strategy Model - For organizing and analyzing performance by system
 // model Strategy {

@@ -4,8 +4,9 @@ import prisma from "@/lib/db";
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { AssetType, TradeDirection } from "@/generated/prisma";
-import { getTradeDirection } from "@/trpc/utils";
+import { getTradeDirection, getTradeStatus } from "@/trpc/utils";
 import z from "zod";
+import { get } from "http";
 
 export const appRouter = createTRPCRouter({
   addTrade: protectedProcedure
@@ -49,6 +50,7 @@ export const appRouter = createTRPCRouter({
           target: input.target,
           stopLoss: input.stopLoss,
           optionType: input.optionType,
+          status: getTradeStatus(input.actions),
           strike: input.strike,
           actions: {
             create: input.actions.map((action) => ({

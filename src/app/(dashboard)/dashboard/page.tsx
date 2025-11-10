@@ -24,6 +24,20 @@ const Page = () => {
           <p>Stop-Loss: {trade.stopLoss}</p>
           <p>Direction: {trade.direction}</p>
           <p>Strike: {trade.strike}</p>
+          <p>Option Type: {trade.optionType}</p>
+          <h2 className="mt-2 font-semibold">Actions:</h2>
+          {trade.actions.map((action) => (
+            <div key={action.id} className="ml-4">
+              <p>Action Type: {action.actionType}</p>
+              <p>Price: {action.price}</p>
+              <p>Size: {action.size}</p>
+              <p>Fees: {action.fees}</p>
+              <p>
+                Timestamp: {new Date(action.timestamp).toLocaleString()}
+              </p>
+            </div>
+          ))}
+          <p>Status: {trade.status}</p>
           <p>Created At: {new Date(trade.createdAt).toLocaleString()}</p>
         </div>
       ))}

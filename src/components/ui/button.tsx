@@ -22,8 +22,11 @@ const buttonVariants = cva(
         // Press variant: elevated shadow that animates to a pressed (smaller shadow + translate)
         press:
           "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:shadow-sm active:translate-y-[2px] transition-[box-shadow,transform] duration-150",
+        // Interactive variant: Duolingo-style elevated button with hover and click animations
+        interactive:
+          "bg-primary text-primary-foreground rounded-xl shadow-[0_6px_0_0] shadow-primary/60 hover:bg-primary/90 hover:translate-y-[2px] hover:shadow-[0_4px_0_0] hover:shadow-primary/60 active:translate-y-[4px] active:shadow-[0_2px_0_0] active:shadow-primary/60 transition-all duration-150 transform-gpu",
         link: "text-primary underline-offset-4 hover:underline",
-      },
+      }, 
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",

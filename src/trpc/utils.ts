@@ -29,3 +29,33 @@ export function getTradeDirection(
 
   return tradeDirection;
 }
+
+function getTradeStatus(
+  actions: { actionType: "BUY" | "SELL"; size: number }[]
+): "PENDING" | "OPEN" | "CLOSED" | "CANCELLED" {
+  if (!actions || actions.length === 0) {
+    return "PENDING";
+  }
+
+  // Calculate net position (positive = long position, negative = short position, zero = closed)
+  let netPosition = 0;
+  
+  for (const action of actions) {
+    if (action.actionType === "BUY") {
+      netPosition += action.size;
+    } else if (action.actionType === "SELL") {
+      netPosition -= action.size;
+    }
+  }
+
+  // Determine status based on net position
+  if (netPosition === 0) {
+    return "CLOSED"; // All positions have been closed
+  } else if (netPosition !== 0) {
+    return "OPEN"; // There's still an open position
+  }
+
+  return "PENDING"; // Fallback
+};
+
+export { getTradeStatus };
